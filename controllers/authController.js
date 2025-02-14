@@ -47,54 +47,65 @@ exports.registerUser = async (req, res) => {
 
 // Login User & Generate JWT
 exports.loginUser = async (req, res) => {
-    try {
-      const { email, password } = req.body;
-  
-      // Find user by email
-      const user = await Auth.findOne({ email });
-      if (!user) {
-        return res.status(400).json({ error: "Invalid credentials" });
-      }
-  
-      // Compare password
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(400).json({ error: "Invalid credentials" });
-      }
-  
-      // Generate JWT token with full user details
-      const payload = {
-        userId: user._id,
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    // Find user by email
+    const user = await Auth.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
+
+    // Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      console.error('Password mismatch');  // Log password mismatch
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
+
+    // JWT secret key (ensure it's set in the environment)
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not set in the environment variables');
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+
+    // Generate JWT token
+    const payload = {
+      userId: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      referal_code: user.referal_code,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    };
+    
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    // Send back the token and full user details
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        _id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role,
         referal_code: user.referal_code,
+        role: user.role,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
-      };
-  
-      // JWT secret key (stored in env file for security)
-      const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
-  
-      // Send back the token and full user details
-      res.status(200).json({
-        message: "Login successful",
-        token,
-        user: {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          referal_code: user.referal_code,
-          role: user.role,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt
-        }
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Server error" });
-    }
-  };
+      }
+    });
+  } catch (error) {
+    console.error('Server error:', error);  // Log complete error
+    res.status(500).json({ error: error.message || "Server error" });
+  }
+};
+
   
 // Middleware to protect routes using JWT token
 exports.verifyToken = (req, res, next) => {
