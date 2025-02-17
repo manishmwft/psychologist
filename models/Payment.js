@@ -6,6 +6,10 @@ const paymentSchema = new mongoose.Schema(
     transactionId: { type: String, required: true, unique: true }, // Unique transaction ID
     amount: { type: Number, required: true }, // Transaction amount
     paymentDate: { type: Date, default: Date.now }, // Date of transaction
+    product: { 
+      type: String, 
+      required: true  
+    }
   },
   { timestamps: true }
 );

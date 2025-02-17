@@ -5,6 +5,7 @@ const authRoutes = require('./routes/authRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const walletRoutes = require('./routes/walletRoutes');
 const referralRoutes = require('./routes/referralRoutes');
+const WalletHistoryRoutes = require('./routes/WalletHistoryRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -25,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/referral', referralRoutes);
+app.use('/api/wallethistory', WalletHistoryRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;

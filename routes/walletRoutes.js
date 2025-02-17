@@ -8,4 +8,6 @@ router.post('/update-wallet', walletController.createOrUpdateWallet);
 // Route to get wallet info by user ID
 router.get('/:userId', walletController.getWalletByUser);
 
+router.put('/update', walletController.updateWallet);
+
 module.exports = router;

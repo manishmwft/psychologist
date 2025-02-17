@@ -74,3 +74,55 @@ exports.getWalletByUser = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+
+// Update Wallet
+exports.updateWallet = async (req, res) => {
+  try {
+    const { userId, purchasedAmount, purchasedCoins, rewardedCoins, referralCoins } = req.body;
+
+    // Validate that userId is provided
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    // Check if the user exists
+    const user = await Auth.findById(userId);
+    if (!user) {
+      return res.status(400).json({ error: "User not found" });
+    }
+
+    // Find the wallet for the user
+    let wallet = await Wallet.findOne({ userId });
+    if (!wallet) {
+      return res.status(404).json({ error: "Wallet not found for this user" });
+    }
+
+    // Update only the fields that are provided
+    if (purchasedAmount !== undefined) {
+      wallet.purchasedAmount += purchasedAmount;
+      wallet.totalCoins -= purchasedAmount;  // Deduct the purchasedAmount from totalCoins
+    }
+    if (purchasedCoins !== undefined) wallet.purchasedCoins += purchasedCoins;
+    if (rewardedCoins !== undefined) wallet.rewardedCoins += rewardedCoins;
+    if (referralCoins !== undefined) wallet.referralCoins += referralCoins;
+
+    // Recalculate totalCoins after updating the wallet
+    wallet.totalCoins = wallet.purchasedCoins + wallet.rewardedCoins + wallet.referralCoins;
+
+    // Set the lastUpdated timestamp
+    wallet.lastUpdated = Date.now();
+
+    // Save the updated wallet to the database
+    await wallet.save();
+
+    // Send success response
+    res.status(200).json({
+      message: "Wallet successfully updated",
+      wallet,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+};

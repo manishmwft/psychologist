@@ -52,41 +52,25 @@ exports.generateReferralCode = async (req, res) => {
         return res.status(400).json({ error: "All fields are required" });
       }
   
-      // Log referrerUserId to confirm it's being passed correctly
-      console.log("Referrer User ID being queried:", referrerUserId);
-  
-      // Convert referrerUserId to ObjectId to match MongoDB format
-      const referrerId = new mongoose.Types.ObjectId(referrerUserId);
-  
-      // Log referrerId to confirm ObjectId conversion
-      console.log("Referrer ObjectId:", referrerId);
-  
       // Find referrer by ObjectId
-      const referrer = await Auth.findById(referrerId);
-      console.log("Referrer Found:", referrer); // Log referrer to confirm it exists
-  
+      const referrer = await Auth.findById(referrerUserId);
       if (!referrer) {
         return res.status(400).json({ error: "Referrer not found" });
       }
-      console.log("Referrer Referral Code in DB:", referrer.referal_code);
-      console.log("Referral Code from Request:", referralCode);  // Log the referralCode
-
-      if (referralCode === undefined) {
-        console.error("Referral code is undefined!");
-        return res.status(400).json({ error: "Referral code is missing from the request" });
-      }
-      
-      // Ensure both codes are trimmed and compared case-insensitively
-      if (referrer.referal_code.trim().toUpperCase() !== referralCode.trim().toUpperCase()) {
-        console.error("Referral codes do not match");
+  
+      // Check the referral code
+      if (referrer.referal_code !== referralCode) {
         return res.status(400).json({ error: "Invalid referral code" });
       }
-  
-      // Find referred user by email
+      // Find the referred user by email
       const referredUser = await Auth.findOne({ email: referredEmail });
       if (!referredUser) {
         return res.status(400).json({ error: "Referred user not found" });
       }
+  
+      // Assign the referrer to the referred user
+      referredUser.referredBy = referrer._id; // This sets the referredBy field
+      await referredUser.save();
   
       // Create a new referral record
       const referral = new Referral({
@@ -94,12 +78,12 @@ exports.generateReferralCode = async (req, res) => {
         referredEmail,
         referredUserId: referredUser._id,
         referrerUserId: referrer._id,
-        paymentAmount: 10, // Example amount
+        paymentAmount: 10,  // Example amount
         rewarded: false,
         numberOfReferrals: 1,
       });
   
-      // Save referral record to the database
+      // Save the referral
       await referral.save();
   
       // Update referrer referral count
