@@ -5,10 +5,10 @@ const { v4: uuidv4 } = require('uuid'); // Import uuid package
 // Make Payment
 exports.makePayment = async (req, res) => {
   try {
-    const { userId, amount, transactionId } = req.body;
+    const { userId, amount, transactionId,product } = req.body;
 
     // Validate that all necessary fields are provided
-    if (!userId || !amount || !transactionId) {
+    if (!userId || !amount || !transactionId || !product) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -23,6 +23,7 @@ exports.makePayment = async (req, res) => {
       userId,
       transactionId,
       amount,
+      product,
       paymentDate: new Date(),
     });
 
@@ -40,6 +41,26 @@ exports.makePayment = async (req, res) => {
   }
 };
 
+
+exports.getAllTransactions = async (req, res) => {
+  try {
+    console.log("Fetching all transactions...");
+    
+    // Fetch all transactions from the database
+    const transactions = await Payment.find();
+    console.log("Transactions fetched:", transactions);
+
+    if (!transactions || transactions.length === 0) {
+      console.log("No transactions found.");
+      return res.status(404).json({ error: "No transactions found" });
+    }
+
+    res.status(200).json({ transactions });
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
 
 // Get All Payments by User
 exports.getPaymentsByUser = async (req, res) => {
@@ -59,3 +80,5 @@ exports.getPaymentsByUser = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+
