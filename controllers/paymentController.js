@@ -5,10 +5,10 @@ const { v4: uuidv4 } = require('uuid'); // Import uuid package
 // Make Payment
 exports.makePayment = async (req, res) => {
   try {
-    const { userId, amount } = req.body;
+    const { userId, amount, transactionId } = req.body;
 
     // Validate that all necessary fields are provided
-    if (!userId || !amount) {
+    if (!userId || !amount || !transactionId) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -17,9 +17,6 @@ exports.makePayment = async (req, res) => {
     if (!user) {
       return res.status(400).json({ error: "User not found" });
     }
-
-    // Generate a unique transaction ID using uuid
-    const transactionId = `txn_${uuidv4()}`;
 
     // Create a new payment record
     const newPayment = new Payment({
@@ -42,6 +39,7 @@ exports.makePayment = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
 
 // Get All Payments by User
 exports.getPaymentsByUser = async (req, res) => {
