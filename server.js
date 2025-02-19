@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
+const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const walletRoutes = require('./routes/walletRoutes');
@@ -17,6 +18,9 @@ const connectDB = require('./config/db');
 connectDB();
 
 const app = express();
+
+app.use(cors());
+
 
 // Body parser middleware
 app.use(bodyParser.json());
