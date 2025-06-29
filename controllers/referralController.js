@@ -134,3 +134,59 @@ exports.updateReferralRewardStatus = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+
+// Get All Referrals
+exports.getAllReferrals = async (req, res) => {
+  try {
+    const referrals = await Referral.find().populate("referrerUserId referredUserId", "name email");
+    res.status(200).json({ message: "All referrals retrieved", referrals });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+// Get Referrals by Referrer ID
+exports.getReferralsByReferrer = async (req, res) => {
+  try {
+    const { referrerUserId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(referrerUserId)) {
+      return res.status(400).json({ error: "Invalid referrer ID" });
+    }
+
+    const referrals = await Referral.find({ referrerUserId }).populate("referredUserId", "name email");
+    res.status(200).json({ message: "Referrals retrieved", referrals });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+// Get Referrals by Referred User ID
+exports.getReferralsByReferredUser = async (req, res) => {
+  try {
+    const { referredUserId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(referredUserId)) {
+      return res.status(400).json({ error: "Invalid referred user ID" });
+    }
+
+    const referral = await Referral.findOne({ referredUserId }).populate("referrerUserId", "name email");
+    if (!referral) {
+      return res.status(404).json({ error: "No referral found for this user" });
+    }
+
+    res.status(200).json({ message: "Referral retrieved", referral });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+
+
+
+
+

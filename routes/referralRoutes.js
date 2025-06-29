@@ -11,4 +11,10 @@ router.post('/handle-referral', referralController.handleReferral);
 // Route to update referral reward status (when payment is processed)
 router.post('/update-referral-reward', referralController.updateReferralRewardStatus);
 
+// get referals
+
+router.get("/referrals", referralController.getAllReferrals);
+router.get("/referrals/referrer/:referrerUserId", referralController.getReferralsByReferrer);
+router.get("/referrals/referred/:referredUserId", referralController.getReferralsByReferredUser);
+
 module.exports = router;

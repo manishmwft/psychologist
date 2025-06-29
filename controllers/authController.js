@@ -109,6 +109,7 @@ exports.loginUser = async (req, res) => {
   
 // Middleware to protect routes using JWT token
 exports.verifyToken = (req, res, next) => {
+
   const token = req.headers['authorization'];
 
   if (!token) {
@@ -125,5 +126,17 @@ exports.verifyToken = (req, res, next) => {
     next(); // Proceed to the next middleware/route handler
   } catch (error) {
     res.status(403).json({ error: "Invalid or expired token" });
+  }
+};
+
+
+// Get All Users
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await Auth.find().select('-password'); // Exclude password for security
+    res.status(200).json({ users });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };

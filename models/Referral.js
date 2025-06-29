@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 // Referral Schema
+// Define a schema for the referral model
 const referralSchema = new mongoose.Schema(
   {
     referralCode: { 

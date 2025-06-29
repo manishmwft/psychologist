@@ -13,4 +13,6 @@ router.get('/protected', authController.verifyToken, (req, res) => {
   res.status(200).json({ message: "This is a protected route", user: req.user });
 });
 
+router.get('/users', authController.getAllUsers);
+
 module.exports = router;
